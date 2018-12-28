@@ -79,6 +79,51 @@ void Paint(HWND hwnd)
  
     EndPaint(hwnd, &ps);
 }
+
+void Paint2(HWND hwnd)
+{
+	PAINTSTRUCT ps;
+	HDC hdc;   // DC(可画图的内存对象) 的句柄
+	HPEN hpen; // 画笔
+	int red, blue; // 红、绿两色
+	int y = 0, x = 0; // 行、列
+
+					  // 通过窗口句柄获取该窗口的 DC
+	hdc = BeginPaint(hwnd, &ps);
+
+	int Penstyle[] = {
+		PS_SOLID,       /*   直线   */
+		PS_DASH,        /* -------  */
+		PS_DOT,         /* .......  */
+		PS_DASHDOT,     /* _._._._  */
+		PS_DASHDOTDOT,  /* _.._.._  */
+		PS_NULL         /*          */
+	};
+
+	for (red = 0; red < 256; red++)
+	{
+		for (blue = 0; blue < 256; blue++)
+		{
+			// 创建画笔
+			hpen = CreatePen(Penstyle[0], 1, RGB(red, 0, blue));
+			// 选中画笔
+			SelectObject(hdc, hpen);
+
+			// 画一条从 (x, y) 到 (x, y+1) 的垂直的线
+			MoveToEx(hdc, x, y, NULL);
+			LineTo(hdc, x++, y + 1);
+
+			// 删除画笔
+			DeleteObject(hpen);
+		}
+		// 一行画完 行+1, 列重新置 1
+		y += 1;
+		x = 1;
+	}
+
+	// 关闭DC 结束绘制
+	EndPaint(hwnd, &ps);
+}
  
 /*
  * 第四步,窗口过程
