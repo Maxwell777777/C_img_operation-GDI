@@ -1,0 +1,40 @@
+void Paint3(HWND hwnd)
+{
+	PAINTSTRUCT ps;
+	HDC hdc;
+	HDC mdc;
+	HBITMAP hbmp; // 位图绘制对象句柄
+
+	hdc = BeginPaint(hwnd, &ps);
+
+	// 创建缓存DC (当前窗口DC的兼容DC)
+	mdc = CreateCompatibleDC(hdc);
+
+	// 加载 "E:\bg.bmp" 到位图绘制对象 hbmp 中
+	hbmp = (HBITMAP)LoadImage(
+		NULL,           // 模块实例句柄(要加载的图片在其他DLL中时)
+		"D:\\picture\\001.bmp",    // 位图路径
+		IMAGE_BITMAP,   // 位图类型
+		WINDOW_WIDTH,   // 指定图片宽
+		WINDOW_HEIGHT,  // 指定图片高
+		LR_LOADFROMFILE // 从路径处加载图片
+	);
+
+	// 缓存DC选择位图绘制对象（可以理解为将图片存到mdc中）
+	SelectObject(mdc, hbmp);
+
+	// 将缓存DC中的位图复制到窗口DC上
+	BitBlt(
+		hdc,            // 目的DC
+		0, 0,            // 目的DC的 x,y 坐标
+		WINDOW_WIDTH,   // 要粘贴的图片宽
+		WINDOW_HEIGHT,  // 要粘贴的图片高
+		mdc,            // 缓存DC
+		0, 0,            // 缓存DC的 x,y 坐标
+		SRCCOPY         // 粘贴方式
+	);
+
+	DeleteObject(hbmp);
+	DeleteDC(mdc);
+	EndPaint(hwnd, &ps);
+}
