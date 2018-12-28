@@ -1,0 +1,99 @@
+函数原型
+
+HDC BeginPaint(
+  _In_   HWND hwnd,             // 传入想要获取 DC 的窗口句柄
+  _Out_  LPPAINTSTRUCT lpPaint  // 保存目标窗口的绘图信息
+);
+ 
+ 
+BOOL EndPaint(
+  _In_  HWND hWnd,                  // 目标窗口的句柄
+  _In_  const PAINTSTRUCT *lpPaint  // 目标窗口的绘图信息
+);
+
+SelectObject
+设置目标 DC 选中指定的对象（如画笔、画刷、图片等等）。
+
+
+HGDIOBJ SelectObject(
+  _In_  HDC hdc,        // 目标 DC 的句柄
+  _In_  HGDIOBJ hgdiobj // 被选中的对象
+);
+
+CreatePen
+创建一个画笔（pen）对象。
+
+
+HPEN CreatePen(
+  _In_  int fnPenStyle,     // 样式
+  _In_  int nWidth,         // 宽度
+  _In_  COLORREF crColor    // 颜色
+);
+
+MoveToEx
+移动绘制的初始位置。未移动则默认是 (0,0)。（C语言基础好的可以联想 fseek 函数）
+
+
+BOOL MoveToEx(
+  _In_   HDC hdc,           // 操作目标DC的句柄
+  _In_   int X,             // x 坐标
+  _In_   int Y,             // y 坐标
+  _Out_  LPPOINT lpPoint    // 保存移动后的当前坐标
+);
+
+LineTo
+使用当前选中的对象（selected object、通常是画笔）从当前位置绘制一条直线到目标位置。
+
+
+
+BOOL LineTo(
+  _In_  HDC hdc,    // 目标DC句柄
+  _In_  int nXEnd,  // 目标位置 x 坐标
+  _In_  int nYEnd   // 目标位置 y 坐标
+);
+
+eg:
+
+#include <windows.h>
+ 
+// 用于注册的窗口类名
+const char g_szClassName[] = "myWindowClass";
+ 
+void Paint(HWND hwnd) 
+{
+    // paint struct 绘图结构体，存储目标窗口可以绘图的客户端区域(client area)
+    PAINTSTRUCT ps;
+    HDC hdc;   // DC(可画图的内存对象) 的句柄
+    HPEN hpen; // 画笔
+ 
+    // 通过窗口句柄获取该窗口的 DC
+    hdc = BeginPaint(hwnd, &ps);
+    // 创建画笔
+    hpen = CreatePen(PS_SOLID, 1, RGB(255,0,0));
+    // DC 选择画笔
+    SelectObject(hdc,hpen);
+    // (画笔)从初始点移动到 50,50
+    MoveToEx(hdc, 50, 50, NULL);
+    // (画笔)从初始点画线到 100,100
+    LineTo(hdc, 150, 100);
+ 
+    EndPaint(hwnd, &ps);
+}
+ 
+/*
+ * 第四步,窗口过程
+ */
+LRESULT CALLBACK MyWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    switch(msg)
+    {
+        // 窗口绘制消息
+        case WM_PAINT:
+            Paint(hwnd); // 调用我们的 GDI 绘制函数
+        break;
+        // 其余略...
+    }
+    return 0;
+}
+ 
+// 其余略
